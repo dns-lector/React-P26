@@ -1,7 +1,20 @@
 import { Link, Outlet } from "react-router-dom";
 import './Layout.css';
+import { useContext, useRef } from "react";
+import AppContext from "../../features/context/AppContext";
 
 export default function Layout() {
+    const {user, setUser} = useContext(AppContext);
+    const closeModalRef = useRef();
+
+    const authenticate = () => {
+        setUser({
+            name: "The User",
+            email: "user@i.ua"
+        });
+        closeModalRef.current.click();
+    };
+
     return <>
      <header>
         <nav className="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
@@ -21,19 +34,24 @@ export default function Layout() {
                         </li>                        
                     </ul>
                     <div>      
-                        
+                    {!!user && <>
+                        <button type="button" className="btn btn-outline-secondary"
+                                onClick={() => setUser(null)}>
+                            <i class="bi bi-box-arrow-right"></i>
+                        </button>
+                    </>}  
+                    {!user && <>
                         <a ><i className="bi bi-person-circle"></i></a>
                         <button type="button" className="btn btn-outline-secondary"
                                 data-bs-toggle="modal" data-bs-target="#authModal">
                             <i className="bi bi-box-arrow-in-right"></i>
                         </button>
-                        
+                    </>}
                     </div>
                 </div>
             </div>
         </nav>
-    </header>
-        
+    </header>        
 
     <main><Outlet /></main>
 
@@ -67,8 +85,8 @@ export default function Layout() {
                     </form>
                 </div>
                 <div className="modal-footer">
-                    <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                    <button type="submit" className="btn btn-primary" form="sign-in-form">Вхід</button>
+                    <button ref={closeModalRef} type="button" className="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
+                    <button onClick={authenticate} type="button" className="btn btn-primary" form="sign-in-form">Вхід</button>
                 </div>
             </div>
         </div>

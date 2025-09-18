@@ -3,16 +3,22 @@ import './ui/App.css';
 import Layout from './ui/Layout';
 import Home from '../pages/home/Home';
 import Privacy from '../pages/privacy/Privacy';
+import AppContext from '../features/context/AppContext';
+import { useState } from 'react';
 
 function App() {
-  return <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Layout />} >
-        <Route index element={<Home />} />
-        <Route path="privacy" element={<Privacy />} />
-      </Route>      
-    </Routes>
-  </BrowserRouter>;
+  const [user, setUser] = useState(null);
+
+  return <AppContext.Provider value={ {message: "Hello from App", user, setUser} }>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />} >
+          <Route index element={<Home />} />
+          <Route path="privacy" element={<Privacy />} />
+        </Route>      
+      </Routes>
+    </BrowserRouter>
+  </AppContext.Provider>;
 }
 
 export default App;
