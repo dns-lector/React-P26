@@ -5,13 +5,30 @@
     flex-direction: column;
     justify-content: space-between;
     margin: 10px;
+    background-color: #323232;
+    padding: 3px;
+}
+.calc-expression, .calc-display {
+    width: 100%;
+    text-align: right;
+    background-color: #323232;
+    line-height: 1;
+}
+.calc-expression {
+    height: 25px;
+    font-size: 14px;
+    color: #bebebe;
+    font-weight: 400;
+    padding-top: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 .calc-display {
-    width: 100%;
-    height: 50px;
-    border: 1px solid lightgray;
-    font-size: 30px;
-    text-align: right;
+    height: 45px;
+    /* font-size: 36px; перенесено до JSX */
+    color: #fefefe;
+    font-weight: 600;
+    padding: 4px 8px;
 }
 .calc-row {
     flex: 1;
@@ -22,9 +39,4 @@
 }
 .calc-row .col {
     padding: 0 !important;
-}
-.calc-button {
-    width: 100%;
-    height: 100%;
-    border-radius: 3px;
 }

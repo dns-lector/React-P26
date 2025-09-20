@@ -12,15 +12,18 @@ export default function Home() {
 
     return <div className="text-center">
         <h1 className="display-4">Крамниця</h1>
-        <button className="btn btn-primary" onClick={onCountClick}>+1</button>
-        <h3>Підсумок: {count}</h3>
+        <div className="row">
+            <div className="col">
+                <button className="btn btn-primary" onClick={onCountClick}>+1</button>
+                <h3>Підсумок: {count}</h3>
 
-        {!!user && <p>Вітання, {user.name}</p>}
-        
-        <hr/>
-        <CountWidget count={count} setCount={setCount} />  {/* Prop Drilling */}
-        <hr/>
-        <Calc />
+                {!!user && <p>Вітання, {user.name}</p>}
+                
+                <hr/>
+                <CountWidget count={count} setCount={setCount} />  {/* Prop Drilling */}
+            </div>
+            <div className="col"><Calc /></div>
+        </div>        
     </div>;
 }
 
