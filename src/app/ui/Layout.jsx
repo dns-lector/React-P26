@@ -1,19 +1,11 @@
 import { Link, Outlet } from "react-router-dom";
 import './Layout.css';
-import { useContext, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import AppContext from "../../features/context/AppContext";
+import Base64 from "../../shared/base64/Base64";
 
 export default function Layout() {
-    const {user, setUser} = useContext(AppContext);
-    const closeModalRef = useRef();
-
-    const authenticate = () => {
-        setUser({
-            name: "The User",
-            email: "user@i.ua"
-        });
-        closeModalRef.current.click();
-    };
+    const {user, setToken} = useContext(AppContext);
 
     return <>
      <header>
@@ -36,8 +28,8 @@ export default function Layout() {
                     <div>      
                     {!!user && <>
                         <button type="button" className="btn btn-outline-secondary"
-                                onClick={() => setUser(null)}>
-                            <i class="bi bi-box-arrow-right"></i>
+                                onClick={() => setToken(null)}>
+                            <i className="bi bi-box-arrow-right"></i>
                         </button>
                     </>}  
                     {!user && <>
@@ -60,8 +52,52 @@ export default function Layout() {
             &copy; 2025 - React-P26 - <a >Privacy</a>
         </div>
     </footer>
+    
+    <AuthModal />
+    </>;
+}
 
-    <div className="modal fade" id="authModal" tabIndex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
+function AuthModal() {
+    const {setToken} = useContext(AppContext);
+    const closeModalRef = useRef();
+    const [formState, setFormState] = useState({
+        "login": "",
+        "password": ""
+    });
+    const [isFormValid, setFormValid] = useState(false);
+
+    const authenticate = () => {
+        console.log(formState.login, formState.password);
+        // RFC 7617 
+        const credentials = Base64.encode(`${formState.login}:${formState.password}`);
+        fetch("https://localhost:7229/user/login", {
+            method: "GET",
+            headers: {
+                'Authorization': 'Basic ' + credentials
+            }
+        }).then(r => r.json()).then(j => {
+            if(j.status == 200) {
+                const jwt = j.data;
+                setToken(jwt);
+            }
+            else {
+                console.error(j.data);
+            }
+        });
+
+        // setUser({
+        //     name: "The User",
+        //     email: "user@i.ua"
+        // });
+        // closeModalRef.current.click();
+    };
+
+    useEffect(() => {
+        // console.log("useEffect", formState.login, formState.password);
+        setFormValid(formState.login.length > 2 && formState.password.length > 2);
+    }, [formState]);
+
+    return <div className="modal fade" id="authModal" tabIndex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
         <div className="modal-dialog">
             <div className="modal-content">
                 <div className="modal-header">
@@ -69,35 +105,46 @@ export default function Layout() {
                     <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div className="modal-body">
-                    <form id="sign-in-form">
+                    
                         <div className="input-group mb-3">
                             <span className="input-group-text" id="user-login-addon"><i className="bi bi-key"></i></span>
-                            <input name="user-login" type="text" className="form-control"
+                            <input 
+                                onChange={e => {
+                                    // formState.login = e.target.value;
+                                    // setFormState(formState);  // !! посилання не змінюється - стан не оновлюється
+                                    // console.log("event", formState.login);
+                                    setFormState({...formState, login: e.target.value});
+                                }}
+                                value={formState.login}
+                                name="user-login" type="text" className="form-control"
                                 placeholder="Логін" aria-label="Логін" aria-describedby="user-login-addon"/>
                             <div className="invalid-feedback"></div>
                         </div>
                         <div className="input-group mb-3">
                             <span className="input-group-text" id="user-password-addon"><i className="bi bi-lock"></i></span>
-                            <input name="user-password" type="password" className="form-control" placeholder="Пароль"
+                            <input 
+                                onChange={e => {
+                                    setFormState(state => { return {...state, password: e.target.value}; });
+                                }}
+                                value={formState.password}
+                                name="user-password" type="password" className="form-control" placeholder="Пароль"
                                 aria-label="Пароль" aria-describedby="user-password-addon"/>
                             <div className="invalid-feedback"></div>
                         </div>
-                    </form>
+                        
                 </div>
                 <div className="modal-footer">
                     <button ref={closeModalRef} type="button" className="btn btn-secondary" data-bs-dismiss="modal">Скасувати</button>
-                    <button onClick={authenticate} type="button" className="btn btn-primary" form="sign-in-form">Вхід</button>
+                    <button disabled={!isFormValid} onClick={authenticate} type="button" className="btn btn-primary" >Вхід</button>
                 </div>
             </div>
         </div>
-    </div>
+    </div>;
 
-    </>;
 }
 /*
-Д.З. Створити сторінку "Про нас" (About)
-Навести на ній коротку характеристику проєкту
-Додати деякі контакти (пошта, тлф)
-Вбудувати до роутера
-Додати посилання до заголовку шаблона
+Д.З. Реалізувати виведення помилок (відмов) автентифікації
+у складі модального вікна (у лівій нижній частині)
+** протягом процесу передачі даних виводити "loader",
+   що ілюструє тривалість процесу (у лівій нижній частині)
 */

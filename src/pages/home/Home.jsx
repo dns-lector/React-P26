@@ -17,7 +17,7 @@ export default function Home() {
                 <button className="btn btn-primary" onClick={onCountClick}>+1</button>
                 <h3>Підсумок: {count}</h3>
 
-                {!!user && <p>Вітання, {user.name}</p>}
+                {!!user && <p>Вітання, {user.Name}</p>}
                 
                 <hr/>
                 <CountWidget count={count} setCount={setCount} />  {/* Prop Drilling */}
