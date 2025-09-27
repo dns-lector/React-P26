@@ -7,22 +7,47 @@ import { useEffect, useState } from 'react';
 import Base64 from '../shared/base64/Base64';
 import Intro from '../pages/intro/Intro';
 import Layout from './ui/layout/Layout';
+import Group from '../pages/Group/Group';
 
 function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
+  const [productGroups, setProductGroups] = useState([]);
+
+  useEffect(() => {
+    request("/api/product-group")
+        .then(homePageData => setProductGroups(homePageData.productGroups));
+  }, []);
 
   useEffect(() => {
     const u = token == null ? null : Base64.jwtDecodePayload(token) ;
-    console.log(u);
+    // console.log(u);
     setUser(u);
   }, [token]);
 
-  return <AppContext.Provider value={ {message: "Hello from App", user, token, setToken} }>
+  const request = (url, conf) => new Promise((resolve, reject) => {
+    if(url.startsWith('/')) {
+      url = "https://localhost:7229" + url;
+    }
+    fetch(url, conf)
+      .then(r => r.json())
+      .then(j => {
+        if(j.status.isOk) {
+          resolve(j.data);
+        }
+        else {
+          console.error(j);
+          reject(j);
+        }
+      });
+  });
+
+  return <AppContext.Provider value={ {request, user, token, setToken, productGroups} }>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />} >
           <Route index element={<Home />} />
+          <Route path="group/:slug" element={<Group />} />
           <Route path="intro" element={<Intro />} />
           <Route path="privacy" element={<Privacy />} />
         </Route>      
@@ -32,3 +57,8 @@ function App() {
 }
 
 export default App;
+/*
+Д.З. У віджеті з переліком груп (на сторінці товарів)
+додати картинку групи та її опис (опис виводити при 
+наведені миші на групу)
+*/

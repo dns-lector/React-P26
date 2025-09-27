@@ -4,20 +4,12 @@ import "./ui/Home.css";
 import { Link } from "react-router-dom";
 
 export default function Home() {
-    const {user} = useContext(AppContext);     // hook
-    const [pageData, setPageData] = useState({productGroups:[]});
+    const {request, productGroups} = useContext(AppContext);     // hook
+    const [pageData, setPageData] = useState({});
 
     useEffect(() => {
-        fetch("https://localhost:7229/api/product-group")
-        .then(r => r.json())
-        .then(j => {
-            if(j.status.isOk) {
-                setPageData(j.data);
-            }
-            else {
-                console.error(j);
-            }
-        });
+        request("/api/product-group")
+        .then(setPageData);
     }, []);
 
     return <div>
@@ -26,20 +18,25 @@ export default function Home() {
             <h1 className="display-4">{pageData.pageTitle}</h1>
         </div>
         <div className="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4 mt-4">
-            {pageData.productGroups.map(grp => <div key={grp.slug} className="col">    
-                <div className="card h-100">
-                    <Link to={"/" + grp.slug} className="nav-link">
-                        <img src={grp.imageUrl} className="card-img-top" alt={grp.name}/>
-                    </Link>
-                    <div className="card-body">
-                        <h5 className="card-title">{grp.name}</h5>
-                        <p className="card-text">{grp.description}</p>
-                    </div>
-                </div>
-            </div>)}
+            {productGroups.map(grp => <GroupCard key={grp.slug} group={grp} />)}
         </div>
     </div>;
 }
+
+function GroupCard({group}) {
+    return <div className="col">    
+        <div className="card h-100">
+            <Link to={"/group/" + group.slug} className="nav-link">
+                <img src={group.imageUrl} className="card-img-top" alt={group.name}/>
+            </Link>
+            <div className="card-body">
+                <h5 className="card-title">{group.name}</h5>
+                <p className="card-text">{group.description}</p>
+            </div>
+        </div>
+    </div>;
+}
+
 /*
 Д.З. На стартовій сторінці додати "Топ продажів"
 у вигляді карток товарів нижче переліку груп.
