@@ -5,7 +5,7 @@ import AppContext from "../../../features/context/AppContext";
 import AuthModal from "./AuthModal";
 
 export default function Layout() {
-    const {user, setToken} = useContext(AppContext);
+    const {cart, setToken, user} = useContext(AppContext);
 
     return <>
      <header>
@@ -30,7 +30,11 @@ export default function Layout() {
                     </ul>
                     <div>      
                     {!!user && <>
-                        <button type="button" className="btn btn-outline-secondary"
+                        <Link to="/cart" className="btn btn-outline-success me-3">
+                            <i className="bi bi-cart"></i>
+                            <span>{cart.cartItems.length}</span>
+                        </Link>
+                        <button type="button" className="btn btn-outline-secondary me-2"
                                 onClick={() => setToken(null)}>
                             <i className="bi bi-box-arrow-right"></i>
                         </button>

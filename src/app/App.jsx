@@ -8,26 +8,55 @@ import Base64 from '../shared/base64/Base64';
 import Intro from '../pages/intro/Intro';
 import Layout from './ui/layout/Layout';
 import Group from '../pages/Group/Group';
+import Cart from '../pages/cart/Cart';
 
 function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [productGroups, setProductGroups] = useState([]);
+  const [cart, setCart] = useState({cartItems:[]});
 
   useEffect(() => {
     request("/api/product-group")
-        .then(homePageData => setProductGroups(homePageData.productGroups));
+        .then(homePageData => setProductGroups(homePageData.productGroups));    
   }, []);
+
+  const updateCart = () => {
+    if(token != null) {
+      request("/api/cart").then(data => {
+        if(data != null) {
+          setCart(data);
+        }
+      });
+    }
+    else {
+      setCart({cartItems:[]});
+    }
+  };
 
   useEffect(() => {
     const u = token == null ? null : Base64.jwtDecodePayload(token) ;
     // console.log(u);
     setUser(u);
+    updateCart();
   }, [token]);
 
   const request = (url, conf) => new Promise((resolve, reject) => {
     if(url.startsWith('/')) {
       url = "https://localhost:7229" + url;
+      // автоматично підставляємо токен в усі запити
+      // якщо він є і у запиті немає заголовка авторизації
+      if(token) {
+        if(typeof conf == 'undefined') {
+          conf = {};
+        }
+        if(typeof conf.headers == 'undefined') {
+          conf.headers = {};
+        }
+        if(typeof conf.headers['Authorization'] == 'undefined') {
+          conf.headers['Authorization'] = "Bearer " + token;
+        }
+      }
     }
     fetch(url, conf)
       .then(r => r.json())
@@ -42,11 +71,12 @@ function App() {
       });
   });
 
-  return <AppContext.Provider value={ {request, user, token, setToken, productGroups} }>
+  return <AppContext.Provider value={ {cart, request, updateCart, user, token, setToken, productGroups} }>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />} >
           <Route index element={<Home />} />
+          <Route path="cart" element={<Cart />} />
           <Route path="group/:slug" element={<Group />} />
           <Route path="intro" element={<Intro />} />
           <Route path="privacy" element={<Privacy />} />
@@ -58,7 +88,10 @@ function App() {
 
 export default App;
 /*
-Д.З. У віджеті з переліком груп (на сторінці товарів)
-додати картинку групи та її опис (опис виводити при 
-наведені миші на групу)
+Д.З. Реалізувати повідомлення про додавання товару. 
+"Товар додано до кошику. Перейти до кошику?" 
+** + дві кнопки: "до кошику" та "продовжити покупки"
+А також про помилки, якщо такі виникають
+Також додати повідомлення про необхідність автентифікації
+при спробі додавати товар в неавторизованому режимі
 */
