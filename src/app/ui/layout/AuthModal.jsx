@@ -32,7 +32,7 @@ export default function AuthModal() {
     };
 
     const onModalClose = () => {
-        console.log("Modal hide");
+        // console.log("Modal hide");
         setFormState({
             "login": "",
             "password": ""

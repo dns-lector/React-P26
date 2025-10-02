@@ -3,7 +3,7 @@ import './ui/App.css';
 import Home from '../pages/home/Home';
 import Privacy from '../pages/privacy/Privacy';
 import AppContext from '../features/context/AppContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Base64 from '../shared/base64/Base64';
 import Intro from '../pages/intro/Intro';
 import Layout from './ui/layout/Layout';
@@ -15,6 +15,7 @@ function App() {
   const [token, setToken] = useState(null);
   const [productGroups, setProductGroups] = useState([]);
   const [cart, setCart] = useState({cartItems:[]});
+  const alarmRef = useRef();
 
   useEffect(() => {
     request("/api/product-group")
@@ -71,7 +72,11 @@ function App() {
       });
   });
 
-  return <AppContext.Provider value={ {cart, request, updateCart, user, token, setToken, productGroups} }>
+  const alarm = () => {
+    alarmRef.current.click();
+  };
+
+  return <AppContext.Provider value={ {alarm, cart, request, updateCart, user, token, setToken, productGroups} }>
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Layout />} >
@@ -83,15 +88,39 @@ function App() {
         </Route>      
       </Routes>
     </BrowserRouter>
+    <i 
+      style={{display: 'block', width:0, height: 0, position: 'absolute'}}
+      ref={alarmRef} 
+      data-bs-toggle="modal" 
+      data-bs-target="#alarmModal"></i>
+    <Alarm />
   </AppContext.Provider>;
+}
+
+function Alarm() {
+  return <div className="modal fade" id="alarmModal" tabIndex="-1" aria-labelledby="alarmModalLabel" aria-hidden="true">
+  <div className="modal-dialog">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h1 className="modal-title fs-5" id="alarmModalLabel">Modal title</h1>
+        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div className="modal-body">
+        ...
+      </div>
+      <div className="modal-footer">
+        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" className="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>;
 }
 
 export default App;
 /*
-Д.З. Реалізувати повідомлення про додавання товару. 
-"Товар додано до кошику. Перейти до кошику?" 
-** + дві кнопки: "до кошику" та "продовжити покупки"
-А також про помилки, якщо такі виникають
-Також додати повідомлення про необхідність автентифікації
-при спробі додавати товар в неавторизованому режимі
+Д.З. Реалізувати роботу кнопки "Видалити весь кошик". 
+Перед видаленням сформувати попередження 
+"Ви підтверджуєте видалення кошику з 4 товарами на 1234 грн?"
+(зауваження - сума кошику не є сумою товарів, а окремим полем)
 */
