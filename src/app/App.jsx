@@ -9,6 +9,9 @@ import Intro from '../pages/intro/Intro';
 import Layout from './ui/layout/Layout';
 import Group from '../pages/Group/Group';
 import Cart from '../pages/cart/Cart';
+import Product from '../pages/product/Product';
+
+const tokenStorageKey = "react-p26-token";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -18,6 +21,22 @@ function App() {
   const alarmRef = useRef();
 
   useEffect(() => {
+    const storedToken = localStorage.getItem(tokenStorageKey);
+    if(storedToken) {
+      const payload = Base64.jwtDecodePayload(storedToken);
+      const exp = new Date(payload.Exp.toString().length == 13 
+        ? Number(payload.Exp)
+        : Number(payload.Exp) * 1000
+      );
+      const now = new Date();
+      if(exp < now) {
+        localStorage.removeItem(tokenStorageKey);
+      }
+      else {
+        console.log("Token left: ", (exp - now) / 1e3, "sec");
+        setToken(storedToken);
+      }      
+    }
     request("/api/product-group")
         .then(homePageData => setProductGroups(homePageData.productGroups));    
   }, []);
@@ -36,9 +55,14 @@ function App() {
   };
 
   useEffect(() => {
-    const u = token == null ? null : Base64.jwtDecodePayload(token) ;
-    // console.log(u);
-    setUser(u);
+    if(token == null) {
+      setUser(null);
+      localStorage.removeItem(tokenStorageKey);
+    }
+    else {
+      localStorage.setItem(tokenStorageKey, token);
+      setUser(Base64.jwtDecodePayload(token));
+    }
     updateCart();
   }, [token]);
 
@@ -85,6 +109,7 @@ function App() {
           <Route path="group/:slug" element={<Group />} />
           <Route path="intro" element={<Intro />} />
           <Route path="privacy" element={<Privacy />} />
+          <Route path="product/:slug" element={<Product />} />
         </Route>      
       </Routes>
     </BrowserRouter>

@@ -47,7 +47,11 @@ export default function AuthModal() {
 
     useEffect(() => {
         modalRef.current.addEventListener('hide.bs.modal', onModalClose);
-        return () => modalRef.current.removeEventListener('hide.bs.modal', onModalClose);
+        return () => {
+            if(modalRef.current) {
+                modalRef.current.removeEventListener('hide.bs.modal', onModalClose);
+            }
+        }
     }, []);
 
     return <div ref={modalRef} className="modal fade" id="authModal" tabIndex="-1" aria-labelledby="authModalLabel" aria-hidden="true">
