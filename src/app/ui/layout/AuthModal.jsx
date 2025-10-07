@@ -3,7 +3,7 @@ import AppContext from "../../../features/context/AppContext";
 import Base64 from "../../../shared/base64/Base64";
 
 export default function AuthModal() {
-    const {setToken, request} = useContext(AppContext);
+    const {request, setToken} = useContext(AppContext);
     const closeModalRef = useRef();
     const modalRef = useRef();
     const [formState, setFormState] = useState({

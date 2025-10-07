@@ -39,7 +39,25 @@ function CartItem({cartItem}) {
 
     const changeQuantity = (cnt) => {
         if(cnt + cartItem.quantity <= 0) {
-            alarm();
+            alarm({
+                title: "Дія незворотня",
+                message: `Підтверджуєте видалення позиції '${cartItem.product.name}'`,
+                buttons: [
+                    {status: "negative", title: "Скасувати"},
+                    {status: "positive", title: "Видалити"},
+                    {status: "neutral",  title: "Закрити"},
+                ]
+            })
+            .then(status => {
+                if(status == "positive") {
+                    request("/api/cart/" + cartItem.productId + "?increment=" + cnt, {
+                        method: "PATCH"
+                    }).then(updateCart).catch(alert);
+                }
+            })
+            .catch(() => {
+                console.log("alarm cancelled");
+            });
         }
         else {
             request("/api/cart/" + cartItem.productId + "?increment=" + cnt, {
